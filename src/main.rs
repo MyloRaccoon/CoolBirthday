@@ -20,18 +20,66 @@ fn main() {
 
     match cli.command {
         Commands::List => app.list(),
-        Commands::Add { name, month, day } => { 
-            println!("{}", match app.add(name.clone(), month, day) {
-                Ok(_) => format!("Added birthday of {name}: {day}/{month}"),
-                Err(e) => format!("Error: {e}"),
-            });
+
+
+        Commands::Check { name } => {
+            match name {
+                Some(n) => {
+                    match app.check(n.clone()) {
+                        Some(b) => {
+                            if b {
+                                println!("Today is {n}'s birthday !");
+                            } else {
+                                println!("{}", app.get(n).unwrap());
+                            }
+                        },
+                        None => println!("Birthday of {n} doesn't exists"),
+                    }
+                },
+
+                None => match app.check_all() {
+                    Some(birthday) => println!("Today is {}'s birthday !", birthday.name),
+                    None => {
+                        match app.get_next() {
+                            Some(birthday) => println!("Next birthday is {birthday}"),
+                            None => println!("Please add some birthday before (coolbirthday add)"),
+                        };
+                    },
+                },
+            }
         },
+
+
+        Commands::Add { name, month, day } => { 
+            if app.birthday_exists(name.clone()) {
+                println!("Birthday of {name} already exists");
+            } else {
+                match app.add(name.clone(), month, day) {
+                    Ok(birthday) => println!("Added birthday {birthday}"),
+                    Err(e) => println!("Error: {e}"),
+                };
+            }
+        },
+
+
+        Commands::Remove { name } => {
+            if app.birthday_exists(name.clone()) {
+                app.remove(name.clone());
+                println!("Removed birthday of {name}");
+            } else {
+                println!("Birthday of {name} doesn't exists");
+            }
+        },
+
+
         Commands::Nuke => {
-            match App::nuke() {
-                Ok(_) => println!("Nuking Cool Birthday"),
-                Err(e) => println!("Error, couln't nuke: {e}"),
-            };
+            println!("Nuking Cool Birthday");
+            app.nuke();
         },
     };
 
+    match app.save() {
+        Ok(c) => c,
+        Err(e) => println!("Error, couln't save: {e}"),
+    };
 }

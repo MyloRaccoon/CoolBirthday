@@ -4,7 +4,6 @@ use serde_json::from_slice;
 use std::io::{Write, Read};
 use std::fs::{self, File};
 use std::path::{Path, PathBuf};
-use serde::{Serialize, Deserialize};
 
 use crate::birthday::Birthday;
 
@@ -31,33 +30,9 @@ fn get_file_path() -> Result<PathBuf> {
 	Ok(path)
 }
 
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct BirthdayDto {
-	pub name: String,
-	pub month: u32,
-	pub day: u32,
-}
-
-impl From<Birthday> for BirthdayDto {
-	
-	fn from(birthday: Birthday) -> Self {
-		Self { 
-			name: birthday.name,
-			month: birthday.month, 
-			day: birthday.day,
-		}
-	}
-
-}
-
 pub fn save(birthdays: Vec<Birthday>) -> Result<()> {
 	let mut file = File::create(get_file_path()?)?;
-	let mut birthdays_dto = vec![];
-	for birthday in birthdays {
-		birthdays_dto.push(BirthdayDto::from(birthday));
-	}
-	let data = serde_json::to_string(&birthdays_dto)?;
+	let data = serde_json::to_string(&birthdays)?;
 	file.write_all(data.as_bytes())?;
 	Ok(())
 }
@@ -67,19 +42,11 @@ pub fn load() -> Result<Vec<Birthday>> {
 		Ok(mut file) => {
 			let mut data = vec![];
 			let _ = file.read_to_end(&mut data);
-			let birthdays_dto: Vec<BirthdayDto> = from_slice(&data)?;
-			let mut birthdays = vec![];
-			for birthday_dto in birthdays_dto {
-				birthdays.push(Birthday::from(birthday_dto));
-			} 
+			let birthdays: Vec<Birthday> = from_slice(&data)?;
 			Ok(birthdays)
 		},
 		Err(_) => {
 			Ok(Vec::new())
 		}
 	}
-}
-
-pub fn nuke() -> Result<()> {
-	Ok(fs::remove_file(get_file_path()?)?)
 }

@@ -1,13 +1,13 @@
+use anyhow::{Result, anyhow};
 use chrono::{Datelike, NaiveDate};
 use std::fmt;
-
-use crate::file::BirthdayDto;
+use serde::{Serialize, Deserialize};
 
 pub fn now() -> NaiveDate {
     chrono::Local::now().date_naive()
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Birthday {
     pub name: String,
     pub month: u32,
@@ -16,12 +16,11 @@ pub struct Birthday {
 
 impl Birthday {
 
-    pub fn new(name: String, month: u32, day: u32) -> Self {
-        Self { 
-            name, 
-            month,
-            day,
+    pub fn new(name: String, month: u32, day: u32) -> Result<Self> {
+        if NaiveDate::from_ymd_opt(2000, month, day).is_none() {
+            return Err(anyhow!("Coudn't create Birthday: date incorrect"));
         }
+        Ok(Self{ name, month, day })
     }
 
     pub fn get_next_date(&self) -> NaiveDate {
@@ -36,7 +35,7 @@ impl Birthday {
 
     pub fn get_days(&self) -> i64 {
         let now = now();
-        let date = NaiveDate::from_ymd_opt(now.year(), self.month, self.day).unwrap();
+        let date = self.get_next_date();
         (date - now).num_days()
     }
 
@@ -45,18 +44,11 @@ impl Birthday {
     }
 }
 
-impl From<BirthdayDto> for Birthday {
-    
-    fn from(birthday: BirthdayDto) -> Self {
-        Self::new(birthday.name, birthday.month, birthday.day)
-    }
-
-}
-
 impl fmt::Display for Birthday {
 
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}: {}/{}", self.name, self.day, self.month)
+        let date = NaiveDate::from_ymd_opt(2000, self.month, self.day).unwrap();
+        write!(f, "{}: {} (in {} days)", self.name, date.format("%d/%m"), self.get_days())
     }
 
 }
