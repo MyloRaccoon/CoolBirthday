@@ -11,6 +11,8 @@ EXIT CODES:
 */
 fn main() -> ExitCode {
 
+    const VERSION: &str = "V1.1";
+
     let cli = Cli::parse();
 
     let mut exit_code = ExitCode::SUCCESS;
@@ -30,6 +32,7 @@ fn main() -> ExitCode {
     match cli.command {
         Some(command) => {
             match command {
+                Commands::Version => println!("CoolBirthday by Mylo - {VERSION}"),
                 Commands::List => app.list(),
 
 

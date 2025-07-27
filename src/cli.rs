@@ -9,6 +9,9 @@ pub struct Cli {
 
 #[derive(Debug, Subcommand)]
 pub enum Commands {
+	#[command(about="display the version of Cool Birthday")]
+	Version,
+
 	#[command(about="list all registered birthdays")]
 	List,
 
