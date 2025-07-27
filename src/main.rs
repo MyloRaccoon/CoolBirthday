@@ -1,9 +1,19 @@
 use clap::Parser;
 use coolbirthday::{app::App, cli::{Cli, Commands}, file::init, popup::popup};
+use std::process::ExitCode;
 
-fn main() {
+
+/*
+EXIT CODES:
+0: success
+1: save error
+2: add error
+*/
+fn main() -> ExitCode {
 
     let cli = Cli::parse();
+
+    let mut exit_code = ExitCode::SUCCESS;
 
     if let Err(e) = init() {
         println!("Coudn't create main directory for CoolBirthday:\n{e}");
@@ -57,7 +67,7 @@ fn main() {
                     } else {
                         match app.add(name.clone(), month, day) {
                             Ok(birthday) => println!("Added birthday {birthday}"),
-                            Err(e) => println!("Error: {e}"),
+                            Err(e) => {println!("Error: {e}"); exit_code = ExitCode::from(2)},
                         };
                     }
                 },
@@ -92,6 +102,11 @@ fn main() {
 
     match app.save() {
         Ok(c) => c,
-        Err(e) => println!("Error, couln't save: {e}"),
+        Err(e) => {
+            println!("Error, couln't save: {e}");
+            exit_code = ExitCode::from(1);
+        },
     };
+
+    exit_code
 }
