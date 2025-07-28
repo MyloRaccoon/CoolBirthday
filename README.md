@@ -28,8 +28,3 @@ Unregister a birthday date
 - `name`: Name of the person
 ### Nuke
 Remove every registered birthdays
-
-## Change Logs
-### V1.1
-- Added error exit codes
-- Added version command
