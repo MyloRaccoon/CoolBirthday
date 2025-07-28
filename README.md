@@ -6,6 +6,8 @@ A very cool birthday manager written in Rust, so you never forget one ever again
 If no command is provided, the app will check all registered birthdays.
 If one matches the current date, a popup window will appear.
 (This is useful if you want to run automatic checks, for example)
+### Version
+Show the installed version of Cool Birthday
 ### List
 Lists all registered birthdays.
 ### Check
